@@ -1,7 +1,10 @@
 const express = require('express');
+
 const router = require('./routes/index.js');
 require('./storage.js')()
 const app = express()
+var cors = require('cors')
+app.use(cors())
 const port = 2100
 app.use(express.json())
 // const register = require('./routes/register')

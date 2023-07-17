@@ -1,5 +1,8 @@
-const ROUTER = require('express').Router();
 
+const send = require('../components/Auth/SendEmail').default
+console.log(send, 'send')
+const ROUTER = require('express').Router();
+const jwt = require('jsonwebtoken');
 
 ROUTER.post('/register', async (req, res, next) => {
 
@@ -12,17 +15,53 @@ ROUTER.post('/register', async (req, res, next) => {
             return res.send({ message: 'Enter email id', status: true })
 
         }
-        else  if (!req.body.password) {
 
-            return res.send({ message: 'Enter password', status: true })
+        const query1 = `SELECT email FROM user WHERE email = '${req.body.email}'`
+        const result1 = await readDB.query(query1)
+
+
+        console.log(result1, req.body.email, 'data')
+        if (result1.length) {
+
+
+
+            // console.log(result1, req.body.email,  'data')
+            // const authRes = await Auth(req.body.email)
+
+
+            // console.log(authRes, 'auth response')
+
 
         }
+        else {
 
-        const query = `INSERT INTO user (email, password) VALUES ('${req.body.email}', '${req.body.password}')`
+            var otp = Math.floor(1000 + Math.random() * 9000);
+            // console.log(val);
 
-        const result = await writeDB.query(query)
 
-        return res.send(result)
+            var token = jwt.sign({ 'email': req.body.email, 'otp': otp }, 'shhhhh');
+
+            // const authRes = await send('yatharth448@gmail.com')
+
+
+            console.log(token, otp, 'auth response')
+
+        }
+        return res.send({message:'Otp sent successfully', secret: token, status: true})
+
+        // if()
+
+        //   if (!req.body.password) {
+
+        //     return res.send({ message: 'Enter password', status: true })
+
+        // }
+
+        // const query = `INSERT INTO user (email, password) VALUES ('${req.body.email}', '${req.body.password}')`
+
+        // const result = await writeDB.query(query)
+
+        // return res.send(result1)
 
 
 
@@ -32,7 +71,7 @@ ROUTER.post('/register', async (req, res, next) => {
     }
     catch (error) {
 
-        console.error(error);
+        console.error(error, 'error');
         res.send({
             success: false,
             error: error.message || error
@@ -54,7 +93,7 @@ ROUTER.post('/login', async (req, res, next) => {
             return res.send({ message: 'Enter email id', status: true })
 
         }
-        else  if (!req.body.password) {
+        else if (!req.body.password) {
 
             return res.send({ message: 'Enter password', status: true })
 
@@ -62,7 +101,7 @@ ROUTER.post('/login', async (req, res, next) => {
 
         const query = `SELECT email, password FROM user WHERE email = '${req.body.email}'AND password = '${req.body.password}'`
 
-        const result = await writeDB.query(query)
+        const result = await readDB.query(query)
 
 
 
