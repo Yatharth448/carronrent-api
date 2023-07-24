@@ -19,55 +19,42 @@ ROUTER.post('/register', async (req, res, next) => {
         const query1 = `SELECT email FROM user WHERE email = '${req.body.email}'`
         const result1 = await readDB.query(query1)
 
-
+        
         console.log(result1, req.body.email, 'data')
-        if (result1.length) {
+        if (!result1.length) {
+            
+            const query = `INSERT INTO user (email, status, type) VALUES ('${req.body.email}','${0}','${0}')`
+            const result = await writeDB.query(query)
 
-
-
-            // console.log(result1, req.body.email,  'data')
-            // const authRes = await Auth(req.body.email)
-
-
-            // console.log(authRes, 'auth response')
-
-
-        }
-        else {
 
             var otp = Math.floor(1000 + Math.random() * 9000);
             // console.log(val);
+            String(otp)
 
 
             var token = jwt.sign({ 'email': req.body.email, 'otp': otp }, 'shhhhh');
 
-            // const authRes = await send('yatharth448@gmail.com')
+            const authRes = await send('Email confirmation',req.body.email,'KARYANA email verify' ,otp)
 
 
             console.log(token, otp, 'auth response')
+            
+            return res.send({token:token, status: true})
 
         }
-        return res.send({message:'Otp sent successfully', secret: token, status: true})
+        else {
 
-        // if()
+            const query = `UPDATE user SET password = '${req.body.password}', status = '${1}' WHERE email = '${req.body.email}'`
 
-        //   if (!req.body.password) {
+            const result = await writeDB.query(query)
 
-        //     return res.send({ message: 'Enter password', status: true })
-
-        // }
-
-        // const query = `INSERT INTO user (email, password) VALUES ('${req.body.email}', '${req.body.password}')`
-
-        // const result = await writeDB.query(query)
-
-        // return res.send(result1)
-
-
-
-        // return res.send({ data: 'hello' })
-
-        // res.send(result);
+            if(result)
+            {
+                return res.send({date:result, status: true, message: 'User registered successfull'})
+            }
+           
+        }
+       
     }
     catch (error) {
 
@@ -79,6 +66,62 @@ ROUTER.post('/register', async (req, res, next) => {
     }
 })
 
+
+ROUTER.post('/verifyOTP', async (req, res, next) => {
+
+    try {
+
+        // const result  = req.query.countryCode;
+        // console.log('data', req)
+        if (!req.body.otp) {
+
+            return res.send({ message: 'Invalid OTP', status: true })
+
+        }
+
+
+
+        var decoded = jwt.verify(req.body.token, 'shhhhh');
+        console.log(decoded.otp, req.body.otp , 'otps')
+       if(String(decoded.otp) === String(req.body.otp))
+       {
+        return res.send({ message: 'OTP Verified Successfully', status: true })
+       }
+
+        //jwt.sign({ 'email': req.body.email, 'otp': otp }, 'shhhhh');
+
+
+
+        // const query1 = `SELECT email FROM user WHERE email = '${req.body.email}'`
+        // const result1 = await readDB.query(query1)
+
+
+        // console.log(result1, req.body.email, 'data')
+        // if (result1.length) {
+
+
+
+            // console.log(result1, req.body.email,  'data')
+            // const authRes = await Auth(req.body.email)
+
+
+            // console.log(authRes, 'auth response')
+
+
+        // }
+        return res.send({data:[], status: true})
+
+       
+    }
+    catch (error) {
+
+        console.error(error, 'error');
+        res.send({
+            success: false,
+            error: error.message || error
+        });
+    }
+})
 
 
 ROUTER.post('/login', async (req, res, next) => {
